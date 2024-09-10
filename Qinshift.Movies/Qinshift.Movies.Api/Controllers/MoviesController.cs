@@ -71,7 +71,7 @@ namespace Qinshift.Movies.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, (ex.Message));
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
         [HttpPost("CreateNewMovie")]
@@ -80,7 +80,7 @@ namespace Qinshift.Movies.Api.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(movie.Title) || movie.ReleaseDate == null || movie.Genre == null)
+                if (string.IsNullOrEmpty(movie.Title) ||  movie.Genre == null)
                 {
                     return BadRequest("You must provide the Title, Release date and genre for the movie!");
                 }
