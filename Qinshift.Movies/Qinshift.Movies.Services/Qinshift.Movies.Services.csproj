@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Qinshift.Movies.DataAccess\Qinshift.Movies.DataAccess.csproj" />
+    <ProjectReference Include="..\Qinshift.Movies.DomainModels\Qinshift.Movies.DomainModels.csproj" />
+    <ProjectReference Include="..\Qinshift.Movies.DTOs\Qinshift.Movies.DTOs.csproj" />
+  </ItemGroup>
+
+</Project>
