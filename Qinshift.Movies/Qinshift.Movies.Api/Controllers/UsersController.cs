@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Qinshift.Movies.DTOs;
 using Qinshift.Movies.Services.Interface;
+using Serilog;
 
 namespace Qinshift.Movies.Api.Controllers
 {
@@ -24,6 +25,7 @@ namespace Qinshift.Movies.Api.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex,"Error occured while trying to login user");
                 return BadRequest(ex.Message);
             }
         }
@@ -39,6 +41,7 @@ namespace Qinshift.Movies.Api.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex,"Error occured while trying to create new user");
                 return BadRequest(ex.Message);
             }
         }

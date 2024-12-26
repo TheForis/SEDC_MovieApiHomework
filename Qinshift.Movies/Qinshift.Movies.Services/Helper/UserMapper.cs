@@ -10,14 +10,12 @@ namespace Qinshift.Movies.Services.Helper
     {
         public static UserDto ToUserDto(User user)
         {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            var generatedToken = TokenHelper.GenerateToken(user);
             return  new UserDto()
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 UserName = user.UserName,
-                Token = tokenHandler.WriteToken(generatedToken)
+                Token = TokenHelper.GenerateToken(user)
             };
         }
         public static User ToUser(CreateUserDto user)

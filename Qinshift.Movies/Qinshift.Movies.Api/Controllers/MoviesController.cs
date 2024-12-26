@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Qinshift.Movies.DTOs;
 using Qinshift.Movies.DTOs.Enums;
 using Qinshift.Movies.Services.Interface;
+using Qinshift.Movies.Shared.Exceptions;
+using Serilog;
+using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace Qinshift.Movies.Api.Controllers
 {
@@ -25,6 +29,7 @@ namespace Qinshift.Movies.Api.Controllers
                 var result = _movieService.GetAllMovies();
                 if (result.Count > 0)
                 {
+                    
                     return Ok(result);
                 }
                 else
@@ -35,6 +40,7 @@ namespace Qinshift.Movies.Api.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error occured while getting ALL movies.");
                 return StatusCode(StatusCodes.Status500InternalServerError, (ex.Message));
             }
         }
@@ -42,19 +48,32 @@ namespace Qinshift.Movies.Api.Controllers
         [Authorize]
         public ActionResult<MovieDto> GetById([FromRoute] int id)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             try
             {
+                Log.Debug("Entered Get movie by ID.");
                 var result = _movieService.GetById(id);
                 if (result == null)
                 {
-                    return NotFound($"There is no movie with id: {id}"!);
+                    throw new MovieNotFoundException($"There is no movie with id: {id}!");
                 }
+                stopwatch.Stop();
+                Log.Debug($"Fetch movie finished in:{stopwatch.ElapsedMilliseconds} ");
+                
                 return Ok(result);
+                
+            }
+            catch (MovieNotFoundException ex)
+            {
+                Log.Error(ex, $"There is no movie with id: {id}!");
+                return StatusCode(StatusCodes.Status404NotFound, ex.Message);
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error occured while getting movie by non-existing ID.");
                 return StatusCode(StatusCodes.Status500InternalServerError, (ex.Message));
             }
+
         }
         [HttpGet("GetById")]
         [Authorize]
@@ -62,15 +81,17 @@ namespace Qinshift.Movies.Api.Controllers
         {
             try
             {
+                var queryString = HttpContext.Request.QueryString;
                 var result = _movieService.GetById(id);
                 if (result == null)
                 {
-                    return NotFound($"There is no movie with id: {id}!");
+                    throw new MovieDataException($"There is no movie with id: {id}!");
                 }
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error occured while getting movie by non-existing ID.");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
@@ -160,7 +181,9 @@ namespace Qinshift.Movies.Api.Controllers
                 else { return BadRequest("Genre or year must be specified!"); }
 
             }
-            catch (Exception ex) { return StatusCode(StatusCodes.Status500InternalServerError, (ex.Message)); }
+            catch (Exception ex) {
+                Log.Error(ex, "Error occured while getting movie by filtering.");
+                return StatusCode(StatusCodes.Status500InternalServerError, (ex.Message)); }
         }
 
     }

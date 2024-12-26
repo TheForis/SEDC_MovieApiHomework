@@ -7,13 +7,19 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using AutoMapper;
+using Qinshift.Movies.DomainModels;
 
 namespace Qinshift.Movies.Services.Implementation
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo;
-        public UserService(IUserRepository userRepository) { _userRepo = userRepository; }
+        private readonly IMapper _mapper;
+        public UserService(IUserRepository userRepository, IMapper mapper)
+        {
+            _userRepo = userRepository;
+            _mapper = mapper;}
 
         public int CreateUser(CreateUserDto userDto)
         {
@@ -52,7 +58,8 @@ namespace Qinshift.Movies.Services.Implementation
             }
             else 
             {
-                var resultToDto = UserMapper.ToUserDto(result);
+                //var resultToDto = UserMapper.ToUserDto(result);
+                var resultToDto = _mapper.Map<User, UserDto>(result);
                 return resultToDto;
             }
         }

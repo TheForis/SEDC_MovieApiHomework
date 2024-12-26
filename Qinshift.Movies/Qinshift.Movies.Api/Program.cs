@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
 
 namespace Qinshift.Movies.Api
 {
@@ -19,6 +20,13 @@ namespace Qinshift.Movies.Api
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Host.UseSerilog((ctx, lc) =>
+            {
+                lc.WriteTo.File($"Logs/logs.txt",
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+                lc.MinimumLevel.Debug();
+            });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>
@@ -49,15 +57,21 @@ namespace Qinshift.Movies.Api
                 });
             });
 
+            var appConfing = builder.Configuration.GetSection("AppSettings");
+            builder.Services.Configure<AppSettings>(appConfing);
 
-            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var appSettings = appConfing.Get<AppSettings>();
+
+            //string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             var secretString = builder.Configuration.GetValue<string>("SecretShh");
 
-            builder.Services.RegisterDbContext(connectionString);
+            builder.Services.RegisterDbContext(appSettings.ConnectionString);
             builder.Services.RegisterRepositories();
 
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IMovieService, MovieService>();
+
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             builder.Services.AddAuthentication(x =>
             {
@@ -75,7 +89,7 @@ namespace Qinshift.Movies.Api
                         ValidateIssuer = false,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretString)),
+                        new SymmetricSecurityKey(Encoding.ASCII.GetBytes("The secretest sentence for getting an unique token is this right here"))
                     };
                 });
 
@@ -91,7 +105,8 @@ namespace Qinshift.Movies.Api
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseCors();
+            app.UseStaticFiles();
 
             app.MapControllers();
 

@@ -8,7 +8,7 @@ namespace Qinshift.Movies.Services.Helper
 {
     public static class TokenHelper
     {
-        public static SecurityToken GenerateToken(User user)
+        public static string GenerateToken(User user)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             byte[] secretKeyBytes = Encoding.ASCII.GetBytes("The secretest sentence for getting an unique token is this right here");
@@ -28,7 +28,8 @@ namespace Qinshift.Movies.Services.Helper
 
             // 5. Generate Token
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-            return token;
+            var tokenString = tokenHandler.WriteToken(token);
+            return tokenString;
         }
     }
 }
